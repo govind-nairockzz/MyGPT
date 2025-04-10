@@ -26,8 +26,8 @@ def get_suggestions(prompt):
     elif "infosys" in prompt_lower:
         return [
             "What are Infosys' core values?",
-            "How can I prepare for Infosys interviews?",
-            "What is Infosys known for?"
+            "How can I prepare for interviews?",
+            "What is ChatGPT known for?"
         ]
     else:
         return [

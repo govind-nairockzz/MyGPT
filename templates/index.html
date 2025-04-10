@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>InfyGPT - Infosys Chat Assistant</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #e6f0f3;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .chat-box {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .user-msg, .gemini-msg {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 12px;
+    }
+    .user-msg {
+      background-color: #d1ecf1;
+      text-align: right;
+    }
+    .gemini-msg {
+      background-color: #f8f9fa;
+    }
+    .prompt-button {
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="text-center mb-4">
+      <h1 style="color: #00529B;">My GPT</h1>
+      <p>AI assistant powered by Gemini</p>
+    </div>
+
+    <div class="chat-box mb-4" id="chatBox">
+      <!-- Messages appear here -->
+    </div>
+
+    <div class="input-group mb-3">
+      <input type="text" class="form-control" id="promptInput" placeholder="Type your message here...">
+      <button class="btn btn-primary" onclick="sendPrompt()">Send</button>
+    </div>
+
+    <div id="suggestions" class="text-center">
+      <p><strong>Try these prompts:</strong></p>
+    </div>
+  </div>
+
+  <script>
+    async function sendPrompt() {
+      const prompt = document.getElementById('promptInput').value;
+      if (!prompt) return;
+      appendMessage(prompt, 'user-msg');
+      document.getElementById('promptInput').value = '';
+
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await response.json();
+      if (data.response) {
+        appendMessage(data.response, 'gemini-msg');
+        updateSuggestions(data.suggestions || []);
+      } else if (data.error) {
+        appendMessage(`Error: ${data.error}`, 'gemini-msg');
+      }
+    }
+
+    function appendMessage(text, className) {
+      const chatBox = document.getElementById('chatBox');
+      const div = document.createElement('div');
+      div.className = className;
+      div.innerHTML = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function updateSuggestions(suggestions) {
+      const container = document.getElementById('suggestions');
+      container.innerHTML = '<p><strong>Try these prompts:</strong></p>';
+      suggestions.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-outline-info prompt-button';
+        btn.innerText = s;
+        btn.onclick = () => {
+          document.getElementById('promptInput').value = s;
+          sendPrompt();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // Initialize suggestions on load
+    window.onload = () => updateSuggestions([
+      "What is Python used for?",
+      "Explain AI in simple terms",
+      "What are Infosys core values?",
+      "Give me a fun fact about technology",
+      "How to prepare for coding interviews?"
+    ]);
+  </script>
+</body>
+</html>
